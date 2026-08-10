@@ -1,0 +1,28 @@
+.circuit-bg, .batik-bg {
+    background-color: #0f172a !important;
+    background-image: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.4)), url("/images/batik.jpg") !important;
+    background-size: cover !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    color: #ffffff !important;
+    position: relative !important;
+}
+
+/* Balanced overlay */
+.circuit-bg::before, .batik-bg::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Ensure content sits above the overlay */
+.circuit-bg > *, .batik-bg > * {
+    position: relative;
+    z-index: 1;
+}
