@@ -26,17 +26,12 @@ export default function PermissionsPage() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [rolesRes, permRes] = await Promise.all([
+            const [rolesRes] = await Promise.all([
                 rolesService.findAll(),
-                permissionsService.findAll()
+                permissionsService.findAll() // we might need this for something else, but rolesRes already has permissions
             ]);
 
-            const combinedData: Role[] = rolesRes.data.map((role: Role) => ({
-                ...role,
-                permissions: permRes.data.filter((p: Permission) => p.roleId === role.id)
-            }));
-
-            setData(combinedData);
+            setData(rolesRes.data);
         } catch (error) {
             message.error('Failed to fetch permissions data');
         } finally {
@@ -91,7 +86,7 @@ export default function PermissionsPage() {
             title: 'Role Type',
             dataIndex: 'type',
             key: 'type',
-            render: (val: string) => <Tag color={val === 'SUPER_ADMIN' ? 'purple' : 'blue'}>{val}</Tag>
+            render: (val: string) => <Tag color={val === 'SUPER_ADMIN' ? 'purple' : 'blue'}>{val || 'CUSTOM'}</Tag>
         },
         {
             title: 'Assigned Permissions',
@@ -100,7 +95,7 @@ export default function PermissionsPage() {
                 <Space size={[0, 4]} wrap>
                     {record.permissions?.slice(0, 5).map((p: Permission) => (
                         <Tag color="cyan" key={p.id} style={{ fontSize: '10px' }}>
-                            {p.action}
+                            {p.action} {p.subject}
                         </Tag>
                     ))}
                     {record.permissions && record.permissions.length > 5 && (

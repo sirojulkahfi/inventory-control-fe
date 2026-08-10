@@ -19,7 +19,7 @@ export default function ModalCreate({ visible, onClose, onSuccess }: Props) {
             setLoading(true);
             
             // Menggunakan method upsert sesuai service backend kamu
-            await settingsService.upsert(values);
+            await (settingsService as any).upsert(values);
             
             message.success('Setting created successfully');
             onSuccess();

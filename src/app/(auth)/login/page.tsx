@@ -42,18 +42,13 @@ function LoginForm() {
         setLoading(true);
         setError(null);
         try {
-            // Hit API backend NestJS
             const res = await authService.login({ username, password });
-
-            if (res && res.accessToken && res.user) {
-                // Simpan ke Zustand & Cookies
-                login(res.accessToken, res.user);
-
-                // PERBAIKAN: Gunakan window.location.href agar Next.js membaca ulang session cookie
-                window.location.href = '/';
-            } else {
-                setError('Respons dari server tidak valid!');
-            }
+            
+            // Simpan token & user
+            login(res.accessToken, res.user);
+            
+            // Pindah ke dashboard
+            window.location.href = '/';
         } catch (err: any) {
             setError(err.response?.data?.message || 'Terjadi kesalahan pada server. Pastikan username/password benar.');
         } finally {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Transfer, Spin, message } from 'antd'; // <-- message diimport langsung dari 'antd'
 import { permissionsService } from '@/services/system/permissions.service';
+import { rolesService } from '@/services/system/roles.service';
 import { Role, Permission } from '@/types';
 
 interface Props {
@@ -26,8 +27,8 @@ const AssignPermissionsModal: React.FC<Props> = ({ visible, onClose, onSuccess, 
 
     useEffect(() => {
         if (visible && role) {
-            const assignedActions = role.permissions?.map((p: Permission) => p.action) || [];
-            setTargetKeys(assignedActions);
+            const assignedIds = (role as any).permissions?.map((p: Permission) => p.id) || [];
+            setTargetKeys(assignedIds);
         } else {
             setTargetKeys([]);
         }
@@ -37,13 +38,12 @@ const AssignPermissionsModal: React.FC<Props> = ({ visible, onClose, onSuccess, 
         setFetchingMaster(true);
         try {
             const res = await permissionsService.findAll();
-            const uniqueActions = Array.from(new Set(res.data.map((p: Permission) => p.action)));
             
-            const formattedData = uniqueActions.map((action: any) => ({
-                id: action,
-                name: action,
-                desc: `Akses modul ${action}`
-            }));
+            const formattedData = res.data.map((p: Permission) => ({
+                id: p.id,
+                name: `${p.action} ${p.subject}`,
+                desc: p.description || `Akses modul ${p.action} ${p.subject}`
+            })).sort((a: any, b: any) => a.name.localeCompare(b.name));
             
             setAvailableActions(formattedData);
         } catch (error) {
@@ -61,22 +61,7 @@ const AssignPermissionsModal: React.FC<Props> = ({ visible, onClose, onSuccess, 
         if (!role) return;
         setLoading(true);
         try {
-            const initialActions = role.permissions?.map((p: Permission) => p.action) || [];
-
-            const actionsToAdd = targetKeys.filter((key: React.Key) => !initialActions.includes(String(key)));
-            const actionsToRemove = initialActions.filter((act: string) => !targetKeys.includes(act));
-
-            const addPromises = actionsToAdd.map((action: React.Key) => 
-                permissionsService.create({ roleId: role.id, action: String(action) })
-            );
-            
-            const removePromises = actionsToRemove.map((action: string) => {
-                const permId = role.permissions?.find((p: Permission) => p.action === action)?.id;
-                return permId ? permissionsService.remove(permId) : Promise.resolve();
-            });
-
-            await Promise.all([...addPromises, ...removePromises]);
-
+            await rolesService.updatePermissions(role.id as string, targetKeys as string[]);
             message.success('Role permissions updated successfully');
             onSuccess();
             onClose();

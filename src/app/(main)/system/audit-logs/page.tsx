@@ -86,9 +86,9 @@ export default function AuditLogsPage() {
         },
         {
             title: 'Entity Name',
-            dataIndex: 'entityName',
-            key: 'entityName',
-            ...getColumnSearchProps('entityName')
+            dataIndex: 'action',
+            key: 'action',
+            ...getColumnSearchProps('action')
         },
         {
             title: 'User',

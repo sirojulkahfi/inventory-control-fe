@@ -14,6 +14,7 @@ export interface Role {
   id: string;
   name: string;
   description?: string;
+  permissions?: Permission[];
   createdAt: string;
   updatedAt: string;
 }
@@ -27,6 +28,7 @@ export enum RoleType {
 
 export interface Permission {
   id: string;
+  roleId?: string;
   action: string;
   subject: string;
   description?: string;

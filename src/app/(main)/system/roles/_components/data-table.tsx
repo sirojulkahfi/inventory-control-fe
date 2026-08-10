@@ -61,6 +61,12 @@ export default function DataTable({ data, loading, selectedRowKeys, setSelectedR
             render: (val: string) => val ? val : <span className="text-gray-400 italic">No description</span>
         },
         {
+            title: 'Role Type',
+            dataIndex: 'type',
+            key: 'type',
+            render: (val: string) => <Tag color={val === 'SUPER_ADMIN' ? 'purple' : 'blue'}>{val || 'CUSTOM'}</Tag>
+        },
+        {
             title: 'Created At',
             dataIndex: 'createdAt',
             key: 'createdAt',

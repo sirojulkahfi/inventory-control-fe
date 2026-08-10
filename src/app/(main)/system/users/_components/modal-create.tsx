@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Select, App } from 'antd';
+import { Modal, Form, Input, Select, App, Space, Button } from 'antd';
 import { usersService } from '@/services/system/users.service';
 import { rolesService } from '@/services/system/roles.service';
+import api from '@/lib/api';
 
 interface Props {
     visible: boolean;
@@ -14,11 +15,13 @@ export default function ModalCreate({ visible, onClose, onSuccess }: Props) {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [roles, setRoles] = useState<{ label: string; value: string }[]>([]);
+    const [customers, setCustomers] = useState<{ label: string; value: string }[]>([]);
 
     useEffect(() => {
         if (visible) {
             form.resetFields();
             fetchRoles();
+            fetchCustomers();
         }
     }, [visible]);
 
@@ -29,6 +32,13 @@ export default function ModalCreate({ visible, onClose, onSuccess }: Props) {
         } catch (error) {
             message.error('Failed to load roles');
         }
+    };
+
+    const fetchCustomers = async () => {
+        try {
+            const res = await api.get('/customer');
+            setCustomers(res.data.map((c: any) => ({ label: c.name, value: c.id })));
+        } catch (error) {}
     };
 
     const handleOk = async () => {
@@ -46,6 +56,18 @@ export default function ModalCreate({ visible, onClose, onSuccess }: Props) {
         }
     };
 
+    const generateUsername = () => {
+        const name = form.getFieldValue('name');
+        if (!name) {
+            message.warning('Isi nama lengkap terlebih dahulu');
+            return;
+        }
+        // Ambil kata pertama + angka random
+        const base = name.split(' ')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+        const randomNum = Math.floor(100 + Math.random() * 900);
+        form.setFieldsValue({ username: `${base}${randomNum}` });
+    };
+
     return (
         <Modal title="Create New User" open={visible} onOk={handleOk} onCancel={onClose} confirmLoading={loading}>
             <Form form={form} layout="vertical">
@@ -53,13 +75,19 @@ export default function ModalCreate({ visible, onClose, onSuccess }: Props) {
                     <Input placeholder="Enter full name" />
                 </Form.Item>
                 <Form.Item name="username" label="Username" rules={[{ required: true }]}>
-                    <Input placeholder="Enter username (e.g. jdoe123)" />
+                    <Space.Compact style={{ width: '100%' }}>
+                        <Input placeholder="Enter username (e.g. jdoe123)" />
+                        <Button type="primary" onClick={generateUsername}>Generate</Button>
+                    </Space.Compact>
                 </Form.Item>
                 <Form.Item name="password" label="Password" rules={[{ required: true }]}>
                     <Input.Password placeholder="Enter password" />
                 </Form.Item>
                 <Form.Item name="roleId" label="Role" rules={[{ required: true }]}>
                     <Select placeholder="Select a role" options={roles} />
+                </Form.Item>
+                <Form.Item name="customerId" label="Customer (B2B Client)" help="Kosongkan jika ini adalah akun internal (Admin/Gudang)">
+                    <Select placeholder="Pilih Perusahaan" options={customers} allowClear />
                 </Form.Item>
             </Form>
         </Modal>
