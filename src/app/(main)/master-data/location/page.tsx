@@ -1,20 +1,22 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Typography, Space, Modal, Form, Input, Card, InputNumber, Row, Col, Tag, message, Breadcrumb, Popconfirm } from 'antd';
+import { Button, Typography, Space, Modal, Form, Input, Card, InputNumber, Row, Col, Tag, message, Breadcrumb, Popconfirm } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
 import api from '@/lib/api';
 import ToolbarWrapper from '@/components/ui/ToolbarWrapper';
 import ButtonToolbar from '@/components/ui/ButtonToolbar';
 import { useAuthStore } from '@/store/useAuthStore';
+import LocationTable from './_components/LocationTable';
+import LocationModal from './_components/LocationModal';
 
 const { Title, Text } = Typography;
 
 export default function LocationPage() {
     const { user } = useAuthStore();
-    const canCreate = user?.role?.name === 'SUPER_ADMIN' || user?.role?.permissions?.includes('CREATE LOCATION');
-    const canEdit = user?.role?.name === 'SUPER_ADMIN' || user?.role?.permissions?.includes('EDIT LOCATION');
-    const canDelete = user?.role?.name === 'SUPER_ADMIN' || user?.role?.permissions?.includes('DELETE LOCATION');
+    const canCreate = user?.role?.name === 'SUPER_ADMIN' || (user?.role?.permissions?.includes('CREATE LOCATION') ?? false);
+    const canEdit = user?.role?.name === 'SUPER_ADMIN' || (user?.role?.permissions?.includes('EDIT LOCATION') ?? false);
+    const canDelete = user?.role?.name === 'SUPER_ADMIN' || (user?.role?.permissions?.includes('DELETE LOCATION') ?? false);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingData, setEditingData] = useState<any>(null);
@@ -72,69 +74,21 @@ export default function LocationPage() {
         form.resetFields();
     };
 
-    const columns = [
-        {
-            title: 'Kode Lokasi',
-            dataIndex: 'code',
-            key: 'code',
-            render: (text: string) => <Tag color="blue">{text}</Tag>,
-        },
-        {
-            title: 'Zona',
-            dataIndex: 'zone',
-            key: 'zone',
-        },
-        {
-            title: 'Lorong',
-            dataIndex: 'aisle',
-            key: 'aisle',
-        },
-        {
-            title: 'Rak',
-            dataIndex: 'rack',
-            key: 'rack',
-        },
-        {
-            title: 'Tingkat',
-            dataIndex: 'level',
-            key: 'level',
-        },
-        {
-            title: 'Kapasitas (Qty)',
-            dataIndex: 'capacity',
-            key: 'capacity',
-        },
-        {
-            title: 'Action',
-            key: 'action',
-            render: (_: any, record: any) => (
-                <Space size="small">
-                    {canEdit && (
-                        <Button
-                            type="text"
-                            icon={<EditOutlined />}
-                            onClick={() => {
-                                setEditingData(record);
-                                form.setFieldsValue(record);
-                                setIsModalOpen(true);
-                            }}
-                        />
-                    )}
-                    {canDelete && (
-                        <Popconfirm
-                            title="Are you sure delete this location?"
-                            onConfirm={() => handleDelete(record.id)}
-                            okText="Yes"
-                            cancelText="No"
-                            placement="topRight"
-                        >
-                            <Button type="text" danger icon={<DeleteOutlined />} />
-                        </Popconfirm>
-                    )}
-                </Space>
-            )
+    const handleDelete = async (id: string) => {
+        try {
+            await api.delete(`/location/${id}`);
+            message.success('Data lokasi berhasil dihapus!');
+            fetchLocations();
+        } catch (error) {
+            message.error('Gagal menghapus data lokasi');
         }
-    ];
+    };
+
+    const handleEdit = (record: any) => {
+        setEditingData(record);
+        form.setFieldsValue(record);
+        setIsModalOpen(true);
+    };
 
     return (
         <div className="flex flex-col">
@@ -148,7 +102,6 @@ export default function LocationPage() {
                     <ButtonToolbar 
                         message="Add New" 
                         icon={<PlusOutlined />} 
-                        type="primary" 
                         onClick={() => {
                             setEditingData(null);
                             form.resetFields();
@@ -159,44 +112,23 @@ export default function LocationPage() {
             </ToolbarWrapper>
 
             <Card className="shadow-sm rounded-xl overflow-hidden mt-2" styles={{ body: { padding: 0 } }}>
-                <Table 
-                    dataSource={locations} 
-                    columns={columns} 
-                    rowKey="id"
-                    loading={loading}
-                    pagination={{ pageSize: 10 }} 
+                <LocationTable 
+                    locations={locations} 
+                    loading={loading} 
+                    canEdit={canEdit} 
+                    canDelete={canDelete} 
+                    onEdit={handleEdit} 
+                    onDelete={handleDelete} 
                 />
             </Card>
 
-            <Modal title={editingData ? "Edit Lokasi Rak" : "Tambah Lokasi Rak"} open={isModalOpen} onOk={handleOk} onCancel={handleCancel} width={600}>
-                <Form form={form} layout="vertical" className="mt-4">
-                    <Row gutter={16}>
-                        <Col span={6}>
-                            <Form.Item label="Zona" name="zone" rules={[{ required: true }]}>
-                                <Input placeholder="A" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                            <Form.Item label="Lorong" name="aisle" rules={[{ required: true }]}>
-                                <Input placeholder="01" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                            <Form.Item label="Rak" name="rack" rules={[{ required: true }]}>
-                                <Input placeholder="01" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                            <Form.Item label="Tingkat" name="level" rules={[{ required: true }]}>
-                                <Input placeholder="01" />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <Form.Item label="Kapasitas Maksimal (Unit)" name="capacity" rules={[{ required: true }]}>
-                        <InputNumber style={{ width: '100%' }} min={0} />
-                    </Form.Item>
-                </Form>
-            </Modal>
+            <LocationModal 
+                open={isModalOpen}
+                onOk={handleOk}
+                onCancel={handleCancel}
+                form={form}
+                editingData={editingData}
+            />
         </div>
     );
 }

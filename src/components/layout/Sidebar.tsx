@@ -71,11 +71,12 @@ export default function Sidebar({ collapsed, onCollapse }: SidebarProps) {
         }
 
         // CUSTOMER BOOKING
-        if (hasPermission('VIEW BOOKING_LIST') || hasPermission('CREATE ASN')) {
+        // For Customer portal, we just give them the Booking list where they can also Create ASN.
+        // We use user.customerId as an implicit permission for customers.
+        if (hasPermission('VIEW BOOKING_LIST') || hasPermission('CREATE ASN') || !!user?.customerId) {
             const bookingChildren: MenuItem[] = [];
-            if (hasPermission('CREATE ASN')) bookingChildren.push(getItem(<Link href="/booking/create-asn">Buat ASN</Link>, '/booking/create-asn'));
-            if (hasPermission('VIEW BOOKING_LIST')) bookingChildren.push(getItem(<Link href="/booking/list">Daftar ASN & Arrival (Security)</Link>, '/booking/list'));
-            items.push(getItem('Customer Booking', 'booking', <AppstoreOutlined />, bookingChildren));
+            bookingChildren.push(getItem(<Link href="/inbound/booking">Manajemen ASN</Link>, '/inbound/booking'));
+            items.push(getItem('Customer Portal', 'customer-portal', <AppstoreOutlined />, bookingChildren));
         }
 
         // INBOUND & PUTAWAY

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Modal, Form, Input, InputNumber, Select, App } from 'antd';
-import { inboundReceiveService } from '@/services/inbound/inbound-receive.service';
+import api from '@/lib/api';
 
 interface Props {
     visible: boolean;
@@ -26,8 +26,8 @@ export default function ModalCreate({ visible, onClose, onSuccess }: Props) {
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            await inboundReceiveService.create(values);
-            message.success('Inbound Receive created successfully');
+            await api.post('/manifest', values);
+            message.success('Manifest created successfully');
             onSuccess();
             onClose();
         } catch (error: any) {

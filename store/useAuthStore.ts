@@ -12,6 +12,7 @@ export interface AuthUser {
     type: string;
     permissions: string[];
   };
+  customerId?: string | null;
 }
 
 interface AuthState {

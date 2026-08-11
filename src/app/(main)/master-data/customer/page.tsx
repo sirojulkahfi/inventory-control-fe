@@ -1,21 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Typography, Space, Modal, Form, Input, Card, message, Breadcrumb, Popconfirm, DatePicker } from 'antd';
+import { Button, Typography, Space, Modal, Form, Input, Card, message, Breadcrumb, Popconfirm, DatePicker } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
 import api from '@/lib/api';
 import dayjs from 'dayjs';
 import ToolbarWrapper from '@/components/ui/ToolbarWrapper';
 import ButtonToolbar from '@/components/ui/ButtonToolbar';
 import { useAuthStore } from '@/store/useAuthStore';
-
-const { Title, Text } = Typography;
+import CustomerTable from './_components/CustomerTable';
+import CustomerModal from './_components/CustomerModal';
 
 export default function CustomerPage() {
     const { user } = useAuthStore();
-    const canCreate = user?.role?.name === 'SUPER_ADMIN' || user?.role?.permissions?.includes('CREATE CUSTOMER');
-    const canEdit = user?.role?.name === 'SUPER_ADMIN' || user?.role?.permissions?.includes('EDIT CUSTOMER');
-    const canDelete = user?.role?.name === 'SUPER_ADMIN' || user?.role?.permissions?.includes('DELETE CUSTOMER');
+    const canCreate = user?.role?.name === 'SUPER_ADMIN' || (user?.role?.permissions?.includes('CREATE CUSTOMER') ?? false);
+    const canEdit = user?.role?.name === 'SUPER_ADMIN' || (user?.role?.permissions?.includes('EDIT CUSTOMER') ?? false);
+    const canDelete = user?.role?.name === 'SUPER_ADMIN' || (user?.role?.permissions?.includes('DELETE CUSTOMER') ?? false);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingData, setEditingData] = useState<any>(null);
@@ -70,79 +70,26 @@ export default function CustomerPage() {
         });
     };
 
-    const columns = [
-        {
-            title: 'Kode Customer',
-            dataIndex: 'code',
-            key: 'code',
-            render: (text: string) => <Text strong className="text-blue-600">{text}</Text>,
-        },
-        {
-            title: 'Nama Customer',
-            dataIndex: 'name',
-            key: 'name',
-        },
-        {
-            title: 'Contact Person',
-            dataIndex: 'contactPerson',
-            key: 'contactPerson',
-        },
-        {
-            title: 'Email',
-            dataIndex: 'email',
-            key: 'email',
-        },
-        {
-            title: 'Telepon',
-            dataIndex: 'phone',
-            key: 'phone',
-        },
-        {
-            title: 'Periode Kontrak',
-            key: 'contract',
-            render: (_: any, record: any) => {
-                if (!record.contractStartDate && !record.contractEndDate) return '-';
-                const start = record.contractStartDate ? dayjs(record.contractStartDate).format('DD MMM YYYY') : '?';
-                const end = record.contractEndDate ? dayjs(record.contractEndDate).format('DD MMM YYYY') : '?';
-                return `${start} - ${end}`;
-            }
-        },
-        {
-            title: 'Action',
-            key: 'action',
-            render: (_: any, record: any) => (
-                <Space size="small">
-                    {canEdit && (
-                        <Button
-                            type="text"
-                            icon={<EditOutlined />}
-                            onClick={() => {
-                                const editData = {
-                                    ...record,
-                                    contractStartDate: record.contractStartDate ? dayjs(record.contractStartDate) : null,
-                                    contractEndDate: record.contractEndDate ? dayjs(record.contractEndDate) : null,
-                                };
-                                setEditingData(editData);
-                                form.setFieldsValue(editData);
-                                setIsModalOpen(true);
-                            }}
-                        />
-                    )}
-                    {canDelete && (
-                        <Popconfirm
-                            title="Are you sure delete this customer?"
-                            onConfirm={() => handleDelete(record.id)}
-                            okText="Yes"
-                            cancelText="No"
-                            placement="topRight"
-                        >
-                            <Button type="text" danger icon={<DeleteOutlined />} />
-                        </Popconfirm>
-                    )}
-                </Space>
-            )
-        },
-    ];
+    const handleDelete = async (id: string) => {
+        try {
+            await api.delete(`/customer/${id}`);
+            message.success('Data customer berhasil dihapus!');
+            fetchCustomers();
+        } catch (error) {
+            message.error('Gagal menghapus data customer');
+        }
+    };
+
+    const handleEdit = (record: any) => {
+        const editData = {
+            ...record,
+            contractStartDate: record.contractStartDate ? dayjs(record.contractStartDate) : null,
+            contractEndDate: record.contractEndDate ? dayjs(record.contractEndDate) : null,
+        };
+        setEditingData(editData);
+        form.setFieldsValue(editData);
+        setIsModalOpen(true);
+    };
 
     return (
         <div className="flex flex-col">
@@ -156,7 +103,6 @@ export default function CustomerPage() {
                     <ButtonToolbar 
                         message="Add New" 
                         icon={<PlusOutlined />} 
-                        type="primary" 
                         onClick={() => {
                             setEditingData(null);
                             form.resetFields();
@@ -167,50 +113,23 @@ export default function CustomerPage() {
             </ToolbarWrapper>
 
             <Card className="shadow-sm rounded-xl overflow-hidden mt-2" styles={{ body: { padding: 0 } }}>
-                <Table 
-                    dataSource={customers} 
-                    columns={columns} 
-                    rowKey="id"
-                    loading={loading}
-                    pagination={{ pageSize: 10 }}
-                    rowClassName="hover:bg-slate-50 transition-colors"
+                <CustomerTable 
+                    customers={customers} 
+                    loading={loading} 
+                    canEdit={canEdit} 
+                    canDelete={canDelete} 
+                    onEdit={handleEdit} 
+                    onDelete={handleDelete} 
                 />
             </Card>
 
-            <Modal title={editingData ? "Edit Customer" : "Tambah Customer Baru"} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                <Form form={form} layout="vertical" className="mt-4">
-                    <Form.Item label="Kode Customer" name="code" rules={[{ required: !!editingData }]}>
-                        <Input placeholder="Auto-generated by System" disabled={!editingData} />
-                    </Form.Item>
-                    <Form.Item label="Nama Customer" name="name" rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label="Contact Person" name="contactPerson" rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label="Email" name="email" rules={[{ type: 'email' }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label="Nomor Telepon" name="phone">
-                        <Input />
-                    </Form.Item>
-                    
-                    <div className="bg-gray-50 p-4 rounded-md border border-gray-100 mt-6 mb-4">
-                        <Text strong className="block mb-4 text-gray-700">Informasi Kontrak Penyimpanan</Text>
-                        <div className="grid grid-cols-2 gap-4">
-                            <Form.Item label="Tanggal Mulai Kontrak" name="contractStartDate">
-                                <DatePicker className="w-full" format="YYYY-MM-DD" />
-                            </Form.Item>
-                            <Form.Item label="Tanggal Berakhir Kontrak" name="contractEndDate">
-                                <DatePicker className="w-full" format="YYYY-MM-DD" />
-                            </Form.Item>
-                        </div>
-                        <Form.Item label="Dokumen Kontrak (URL/Path)" name="contractDocument">
-                            <Input placeholder="https://..." />
-                        </Form.Item>
-                    </div>
-                </Form>
-            </Modal>
+            <CustomerModal 
+                open={isModalOpen}
+                onOk={handleOk}
+                onCancel={handleCancel}
+                form={form}
+                editingData={editingData}
+            />
         </div>
     );
 }
