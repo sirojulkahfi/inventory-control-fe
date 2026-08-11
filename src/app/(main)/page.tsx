@@ -1,9 +1,21 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export default function DashboardPage() {
     const { user } = useAuthStore();
+    const router = useRouter();
+
+    useEffect(() => {
+        const roleName = user?.role?.name;
+        if (roleName === 'SECURITY') router.replace('/gate');
+        else if (roleName === 'OPERATOR_QC') router.replace('/qc');
+        else if (roleName === 'FORKLIFT') router.replace('/putaway');
+        else if (roleName === 'PICKER') router.replace('/picking');
+        else if (roleName === 'CHECKER') router.replace('/shipping');
+    }, [user, router]);
 
     return (
         <div className="h-full">

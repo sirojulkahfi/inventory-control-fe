@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Typography, Space, Modal, Form, Input, Card, Select, message, Breadcrumb, Popconfirm } from 'antd';
+import { Table, Button, Typography, Space, Modal, Form, Input, InputNumber, Card, Select, message, Breadcrumb, Popconfirm } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
 import api from '@/lib/api';
 import ToolbarWrapper from '@/components/ui/ToolbarWrapper';
@@ -94,9 +94,30 @@ export default function ItemPage() {
             key: 'name',
         },
         {
-            title: 'UOM',
+            title: 'Base UOM',
             dataIndex: 'uom',
             key: 'uom',
+        },
+        {
+            title: 'Parent UOM (Konversi)',
+            key: 'parentUom',
+            render: (_: any, record: any) => {
+                if (!record.parentUom) return '-';
+                return `${record.parentUom} (Isi ${record.conversion || 0})`;
+            }
+        },
+        {
+            title: 'Dimensi (LxWxH)',
+            key: 'dimension',
+            render: (_: any, record: any) => {
+                if (!record.length && !record.width && !record.height) return '-';
+                return `${record.length || 0}x${record.width || 0}x${record.height || 0} cm`;
+            }
+        },
+        {
+            title: 'Berat',
+            key: 'weight',
+            render: (_: any, record: any) => record.weight ? `${record.weight} kg` : '-',
         },
         {
             title: 'Pemilik (Customer)',
@@ -151,6 +172,9 @@ export default function ItemPage() {
                         onClick={() => {
                             setEditingData(null);
                             form.resetFields();
+                            if (user?.customerId) {
+                                form.setFieldsValue({ customerId: user.customerId });
+                            }
                             setIsModalOpen(true);
                         }}
                     />
@@ -170,7 +194,7 @@ export default function ItemPage() {
             <Modal title={editingData ? "Edit Item" : "Tambah Item Baru"} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                 <Form form={form} layout="vertical" className="mt-4">
                     <Form.Item label="Pemilik Barang (Customer)" name="customerId" rules={[{ required: true }]}>
-                        <Select placeholder="Pilih Customer">
+                        <Select placeholder="Pilih Customer" disabled={!!user?.customerId}>
                             {customers.map(c => (
                                 <Select.Option key={c.id} value={c.id}>{c.name}</Select.Option>
                             ))}
@@ -182,18 +206,57 @@ export default function ItemPage() {
                     <Form.Item label="Nama Barang" name="name" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item 
-                        label="UOM (Unit of Measure)" 
-                        name="uom" 
-                        rules={[{ required: true }]}
-                        extra={<span style={{ color: '#cf1322', fontSize: '12px' }}>⚠️ Wajib gunakan satuan terkecil (contoh: PCS, KGS, BTL). Jangan gunakan satuan kemasan (BOX / PALLET) untuk menghindari selisih stok saat ada barang rusak.</span>}
-                    >
-                        <Select placeholder="Pilih Satuan">
-                            <Select.Option value="PCS">PCS</Select.Option>
-                            <Select.Option value="BOX">BOX</Select.Option>
-                            <Select.Option value="PALLET">PALLET</Select.Option>
-                        </Select>
-                    </Form.Item>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Form.Item 
+                            label="Base UOM (Satuan Terkecil)" 
+                            name="uom" 
+                            rules={[{ required: true }]}
+                        >
+                            <Select placeholder="Pilih Satuan">
+                                <Select.Option value="PCS">PCS</Select.Option>
+                                <Select.Option value="KGS">KGS</Select.Option>
+                                <Select.Option value="BTL">BTL</Select.Option>
+                                <Select.Option value="ROLL">ROLL</Select.Option>
+                            </Select>
+                        </Form.Item>
+                        <Form.Item label="Kategori" name="category">
+                            <Input placeholder="Misal: Makanan, Apparel" />
+                        </Form.Item>
+                    </div>
+
+                    <div className="bg-gray-50 p-4 rounded-md border border-gray-100 mb-4">
+                        <Text strong className="block mb-4 text-gray-700">Satuan Kemasan & Konversi</Text>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Form.Item label="Satuan Kemasan (Parent UOM)" name="parentUom">
+                                <Select placeholder="Pilih Kemasan" allowClear>
+                                    <Select.Option value="BOX">BOX</Select.Option>
+                                    <Select.Option value="CTN">CTN (Karton)</Select.Option>
+                                    <Select.Option value="PALLET">PALLET</Select.Option>
+                                </Select>
+                            </Form.Item>
+                            <Form.Item label="Isi per Kemasan" name="conversion">
+                                <InputNumber className="w-full" min={1} placeholder="Contoh: 40" />
+                            </Form.Item>
+                        </div>
+                    </div>
+
+                    <div className="bg-gray-50 p-4 rounded-md border border-gray-100 mb-4">
+                        <Text strong className="block mb-4 text-gray-700">Dimensi & Berat</Text>
+                        <div className="grid grid-cols-3 gap-4">
+                            <Form.Item label="Panjang (cm)" name="length">
+                                <InputNumber className="w-full" min={0} step={0.1} />
+                            </Form.Item>
+                            <Form.Item label="Lebar (cm)" name="width">
+                                <InputNumber className="w-full" min={0} step={0.1} />
+                            </Form.Item>
+                            <Form.Item label="Tinggi (cm)" name="height">
+                                <InputNumber className="w-full" min={0} step={0.1} />
+                            </Form.Item>
+                        </div>
+                        <Form.Item label="Berat per Unit (kg)" name="weight">
+                            <InputNumber className="w-full" min={0} step={0.1} />
+                        </Form.Item>
+                    </div>
                 </Form>
             </Modal>
         </div>

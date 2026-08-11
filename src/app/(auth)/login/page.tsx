@@ -47,8 +47,22 @@ function LoginForm() {
             // Simpan token & user
             login(res.accessToken, res.user);
             
-            // Pindah ke dashboard
-            window.location.href = '/';
+            // Redirect based on role (Kiosk Mode Portals)
+            const roleName = res.user?.role?.name;
+            if (roleName === 'SECURITY') {
+                window.location.href = '/gate';
+            } else if (roleName === 'OPERATOR_QC') {
+                window.location.href = '/qc';
+            } else if (roleName === 'FORKLIFT') {
+                window.location.href = '/putaway';
+            } else if (roleName === 'PICKER') {
+                window.location.href = '/picking';
+            } else if (roleName === 'CHECKER') {
+                window.location.href = '/shipping';
+            } else {
+                // Admin, Customer, etc. go to main dashboard
+                window.location.href = '/';
+            }
         } catch (err: any) {
             setError(err.response?.data?.message || 'Terjadi kesalahan pada server. Pastikan username/password benar.');
         } finally {

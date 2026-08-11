@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Typography, Space, Modal, Form, Input, Card, message, Breadcrumb, Popconfirm } from 'antd';
+import { Table, Button, Typography, Space, Modal, Form, Input, Card, message, Breadcrumb, Popconfirm, DatePicker } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
 import api from '@/lib/api';
+import dayjs from 'dayjs';
 import ToolbarWrapper from '@/components/ui/ToolbarWrapper';
 import ButtonToolbar from '@/components/ui/ButtonToolbar';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -97,6 +98,16 @@ export default function CustomerPage() {
             key: 'phone',
         },
         {
+            title: 'Periode Kontrak',
+            key: 'contract',
+            render: (_: any, record: any) => {
+                if (!record.contractStartDate && !record.contractEndDate) return '-';
+                const start = record.contractStartDate ? dayjs(record.contractStartDate).format('DD MMM YYYY') : '?';
+                const end = record.contractEndDate ? dayjs(record.contractEndDate).format('DD MMM YYYY') : '?';
+                return `${start} - ${end}`;
+            }
+        },
+        {
             title: 'Action',
             key: 'action',
             render: (_: any, record: any) => (
@@ -106,8 +117,13 @@ export default function CustomerPage() {
                             type="text"
                             icon={<EditOutlined />}
                             onClick={() => {
-                                setEditingData(record);
-                                form.setFieldsValue(record);
+                                const editData = {
+                                    ...record,
+                                    contractStartDate: record.contractStartDate ? dayjs(record.contractStartDate) : null,
+                                    contractEndDate: record.contractEndDate ? dayjs(record.contractEndDate) : null,
+                                };
+                                setEditingData(editData);
+                                form.setFieldsValue(editData);
                                 setIsModalOpen(true);
                             }}
                         />
@@ -178,6 +194,21 @@ export default function CustomerPage() {
                     <Form.Item label="Nomor Telepon" name="phone">
                         <Input />
                     </Form.Item>
+                    
+                    <div className="bg-gray-50 p-4 rounded-md border border-gray-100 mt-6 mb-4">
+                        <Text strong className="block mb-4 text-gray-700">Informasi Kontrak Penyimpanan</Text>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Form.Item label="Tanggal Mulai Kontrak" name="contractStartDate">
+                                <DatePicker className="w-full" format="YYYY-MM-DD" />
+                            </Form.Item>
+                            <Form.Item label="Tanggal Berakhir Kontrak" name="contractEndDate">
+                                <DatePicker className="w-full" format="YYYY-MM-DD" />
+                            </Form.Item>
+                        </div>
+                        <Form.Item label="Dokumen Kontrak (URL/Path)" name="contractDocument">
+                            <Input placeholder="https://..." />
+                        </Form.Item>
+                    </div>
                 </Form>
             </Modal>
         </div>

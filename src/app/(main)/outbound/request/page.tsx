@@ -6,8 +6,10 @@ import { PlusOutlined, DeleteOutlined, SendOutlined, CloseOutlined } from '@ant-
 import api from '@/lib/api';
 import ToolbarWrapper from '@/components/ui/ToolbarWrapper';
 import ButtonToolbar from '@/components/ui/ButtonToolbar';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function RequestOutboundPage() {
+    const { user } = useAuthStore();
     const [form] = Form.useForm();
     const [items, setItems] = useState<any[]>([]);
     const [customers, setCustomers] = useState<any[]>([]);
@@ -28,6 +30,12 @@ export default function RequestOutboundPage() {
         };
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (user?.customerId) {
+            form.setFieldsValue({ customerId: user.customerId });
+        }
+    }, [user, form]);
 
     const handleAddItem = () => {
         setItems([...items, { id: Date.now(), itemId: null, requestQty: 1 }]);
@@ -124,7 +132,7 @@ export default function RequestOutboundPage() {
                     <Row gutter={24}>
                         <Col span={8}>
                             <Form.Item label="Customer (Pemilik Barang)" name="customerId" rules={[{ required: true }]}>
-                                <Select placeholder="Pilih Customer">
+                                <Select placeholder="Pilih Customer" disabled={!!user?.customerId}>
                                     {customers.map(c => (
                                         <Select.Option key={c.id} value={c.id}>{c.name}</Select.Option>
                                     ))}

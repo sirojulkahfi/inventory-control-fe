@@ -1,5 +1,38 @@
 export * from './common';
 
+export interface Customer {
+  id: string;
+  code: string;
+  name: string;
+  contactPerson?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  contractStartDate?: string;
+  contractEndDate?: string;
+  contractDocument?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Item {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  uom: string;
+  parentUom?: string;
+  conversion?: number;
+  length?: number;
+  width?: number;
+  height?: number;
+  weight?: number;
+  category?: string;
+  customerId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface User {
   id: string;
   username: string;

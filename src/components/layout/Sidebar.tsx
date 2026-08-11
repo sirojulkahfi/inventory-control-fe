@@ -74,16 +74,19 @@ export default function Sidebar({ collapsed, onCollapse }: SidebarProps) {
         if (hasPermission('VIEW BOOKING_LIST') || hasPermission('CREATE ASN')) {
             const bookingChildren: MenuItem[] = [];
             if (hasPermission('CREATE ASN')) bookingChildren.push(getItem(<Link href="/booking/create-asn">Buat ASN</Link>, '/booking/create-asn'));
-            if (hasPermission('VIEW BOOKING_LIST')) bookingChildren.push(getItem(<Link href="/booking/list">Daftar Booking</Link>, '/booking/list'));
+            if (hasPermission('VIEW BOOKING_LIST')) bookingChildren.push(getItem(<Link href="/booking/list">Daftar ASN & Arrival (Security)</Link>, '/booking/list'));
             items.push(getItem('Customer Booking', 'booking', <AppstoreOutlined />, bookingChildren));
         }
 
         // INBOUND & PUTAWAY
         if (hasPermission('VIEW INBOUND_RECEIVE') || hasPermission('VIEW PUTAWAY')) {
             const inboundChildren: MenuItem[] = [];
-            if (hasPermission('VIEW INBOUND_RECEIVE')) inboundChildren.push(getItem(<Link href="/inbound/receive">Receiving & QC</Link>, '/inbound/receive'));
-            if (hasPermission('VIEW PUTAWAY')) inboundChildren.push(getItem(<Link href="/inbound/putaway">Putaway Task</Link>, '/inbound/putaway'));
-            items.push(getItem('Inbound & Receiving', 'inbound', <ImportOutlined />, inboundChildren));
+            if (hasPermission('VIEW INBOUND_RECEIVE')) {
+                inboundChildren.push(getItem(<Link href="/inbound/incoming-receive">Manifest / DO (Security)</Link>, '/inbound/incoming-receive'));
+                inboundChildren.push(getItem(<Link href="/inbound/receive">Receiving & QC (Operator)</Link>, '/inbound/receive'));
+            }
+            if (hasPermission('VIEW PUTAWAY')) inboundChildren.push(getItem(<Link href="/inbound/putaway">Putaway Task (Forklift)</Link>, '/inbound/putaway'));
+            items.push(getItem('Inbound (Security & QC)', 'inbound', <ImportOutlined />, inboundChildren));
         }
 
         // INVENTORY
@@ -96,9 +99,9 @@ export default function Sidebar({ collapsed, onCollapse }: SidebarProps) {
         // OUTBOUND & SHIPPING
         if (hasPermission('VIEW OUTBOUND_REQUEST') || hasPermission('VIEW OUTBOUND_PICKING') || hasPermission('VIEW OUTBOUND_SHIPPING')) {
             const outboundChildren: MenuItem[] = [];
-            if (hasPermission('VIEW OUTBOUND_REQUEST')) outboundChildren.push(getItem(<Link href="/outbound/request">Request Kirim</Link>, '/outbound/request'));
-            if (hasPermission('VIEW OUTBOUND_PICKING')) outboundChildren.push(getItem(<Link href="/outbound/picking">Pick List</Link>, '/outbound/picking'));
-            if (hasPermission('VIEW OUTBOUND_SHIPPING')) outboundChildren.push(getItem(<Link href="/outbound/shipping">Shipping & DO</Link>, '/outbound/shipping'));
+            if (hasPermission('VIEW OUTBOUND_REQUEST')) outboundChildren.push(getItem(<Link href="/outbound/request">Request Kirim (Customer)</Link>, '/outbound/request'));
+            if (hasPermission('VIEW OUTBOUND_PICKING')) outboundChildren.push(getItem(<Link href="/outbound/picking">Pick List (Picker)</Link>, '/outbound/picking'));
+            if (hasPermission('VIEW OUTBOUND_SHIPPING')) outboundChildren.push(getItem(<Link href="/outbound/shipping">Shipping & DO (Checker)</Link>, '/outbound/shipping'));
             items.push(getItem('Outbound & Shipping', 'outbound', <SwapOutlined />, outboundChildren));
         }
 

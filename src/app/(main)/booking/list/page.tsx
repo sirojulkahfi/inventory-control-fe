@@ -189,9 +189,6 @@ export default function BookingListPage() {
                                 <Button type="primary" size="small" style={{ backgroundColor: '#52c41a' }} icon={<CheckCircleOutlined />}>Terima</Button>
                             </Popconfirm>
                         )}
-                        {canEdit && isPending && (
-                            <Button type="primary" size="small" icon={<EditOutlined />} onClick={() => openEditModal(record)}>Edit</Button>
-                        )}
                         {canDelete && isPending && (
                             <Popconfirm title="Batalkan ASN ini?" onConfirm={() => handleDelete(record.id)}>
                                 <Button type="default" danger size="small" icon={<DeleteOutlined />}>Cancel</Button>
@@ -244,7 +241,7 @@ export default function BookingListPage() {
             </ToolbarWrapper>
 
             <Table 
-                columns={columns} 
+                columns={columns.filter(col => user?.role?.name === 'CUSTOMER' ? col.key !== 'action' : true)} 
                 dataSource={bookings} 
                 rowKey="id" 
                 loading={loading}
