@@ -8,6 +8,7 @@ import ToolbarWrapper from '@/components/ui/ToolbarWrapper';
 import ButtonToolbar from '@/components/ui/ButtonToolbar';
 import { inboundReceiveService } from '@/services/inbound/inbound-receive.service';
 import { InboundReceive } from '@/types';
+import { useAuthStore } from '@/store/useAuthStore';
 
 import DataTable from './_components/data-table';
 import ModalCreate from './_components/modal-create';
@@ -16,6 +17,7 @@ import ModalDetail from './_components/modal-detail';
 
 export default function IncomingReceivePage() {
     const { message, modal } = App.useApp();
+    const { user } = useAuthStore();
     const [data, setData] = useState<InboundReceive[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -81,7 +83,7 @@ export default function IncomingReceivePage() {
             cancelText: 'Cancel',
             onOk: async () => {
                 try {
-                    await inboundReceiveService.receive(selectedRowKeys[0] as string);
+                    await inboundReceiveService.receive(selectedRowKeys[0] as string, user?.name);
                     message.success('Manifest received successfully');
                     fetchData();
                 } catch (error: any) {

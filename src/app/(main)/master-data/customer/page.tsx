@@ -100,9 +100,9 @@ export default function CustomerPage() {
                 <ButtonToolbar message="Download CSV" icon={<DownloadOutlined />} />
                 <ButtonToolbar message="Print Report" icon={<PrinterOutlined />} />
                 {canCreate && (
-                    <ButtonToolbar 
-                        message="Add New" 
-                        icon={<PlusOutlined />} 
+                    <ButtonToolbar
+                        message="Add New"
+                        icon={<PlusOutlined />}
                         onClick={() => {
                             setEditingData(null);
                             form.resetFields();
@@ -112,16 +112,16 @@ export default function CustomerPage() {
                 )}
             </ToolbarWrapper>
 
-            <CustomerTable 
-                customers={customers} 
-                loading={loading} 
-                canEdit={canEdit} 
-                canDelete={canDelete} 
-                onEdit={handleEdit} 
-                onDelete={handleDelete} 
+            <CustomerTable
+                customers={customers}
+                loading={loading}
+                canEdit={canEdit}
+                canDelete={canDelete}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
             />
 
-            <CustomerModal 
+            <CustomerModal
                 open={isModalOpen}
                 onOk={handleOk}
                 onCancel={handleCancel}

@@ -1,9 +1,7 @@
 import React from 'react';
-import { Table, Typography, Space, Button, Popconfirm } from 'antd';
+import { Table, Space, Button, Popconfirm } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-
-const { Text } = Typography;
 
 interface CustomerTableProps {
     customers: any[];
@@ -20,7 +18,9 @@ export default function CustomerTable({ customers, loading, canEdit, canDelete, 
             title: 'Kode Customer',
             dataIndex: 'code',
             key: 'code',
-            render: (text: string) => <Text strong className="text-blue-600">{text}</Text>,
+            // Gunakan tag <span> standar dan class font-semibold dari Tailwind 
+            // agar ukurannya otomatis mengikuti font-size 11px dari tabel
+            render: (text: string) => <span className="font-semibold text-black-600">{text}</span>,
         },
         {
             title: 'Nama Customer',
@@ -81,9 +81,9 @@ export default function CustomerTable({ customers, loading, canEdit, canDelete, 
     ];
 
     return (
-        <Table 
-            dataSource={customers} 
-            columns={columns} 
+        <Table
+            dataSource={customers}
+            columns={columns}
             rowKey="id"
             loading={loading}
             size="small"

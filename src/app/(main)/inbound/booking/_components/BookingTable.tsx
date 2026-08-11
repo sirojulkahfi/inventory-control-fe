@@ -1,10 +1,10 @@
+"use client";
+
 import React, { useState } from 'react';
-import { Table, Button, Popconfirm, Tag, Tooltip, Typography, Modal } from 'antd';
+import { Table, Button, Popconfirm, Tag, Tooltip, Modal } from 'antd';
 import { DeleteOutlined, PrinterOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import Barcode from 'react-barcode';
-
-const { Text } = Typography;
 
 interface BookingTableProps {
     data: any[];
@@ -23,7 +23,8 @@ export default function BookingTable({ data, loading, canDelete, onDelete, isCus
             title: 'No. ASN',
             dataIndex: 'bookingNo',
             key: 'bookingNo',
-            render: (text: string) => <Text strong className="text-blue-600">{text}</Text>
+            // Gunakan span standar dan class font-semibold biar ngikutin ukuran tabel & gak warna biru
+            render: (text: string) => <span className="font-semibold">{text}</span>
         },
         ...(!isCustomerPortal ? [{
             title: 'Customer',
@@ -61,9 +62,9 @@ export default function BookingTable({ data, loading, canDelete, onDelete, isCus
             render: (_: any, record: any) => (
                 <div className="flex gap-2">
                     <Tooltip title="Print ASN">
-                        <Button 
-                            type="text" 
-                            icon={<PrinterOutlined />} 
+                        <Button
+                            type="text"
+                            icon={<PrinterOutlined />}
                             onClick={() => {
                                 setSelectedRecord(record);
                                 setIsModalOpen(true);
@@ -76,11 +77,11 @@ export default function BookingTable({ data, loading, canDelete, onDelete, isCus
                             onConfirm={() => onDelete(record.id)}
                             disabled={!canDelete || record.status !== 'WAITING_FOR_ARRIVAL'}
                         >
-                            <Button 
-                                type="text" 
-                                danger 
-                                icon={<DeleteOutlined />} 
-                                disabled={!canDelete || record.status !== 'WAITING_FOR_ARRIVAL'} 
+                            <Button
+                                type="text"
+                                danger
+                                icon={<DeleteOutlined />}
+                                disabled={!canDelete || record.status !== 'WAITING_FOR_ARRIVAL'}
                             />
                         </Popconfirm>
                     </Tooltip>
@@ -91,7 +92,7 @@ export default function BookingTable({ data, loading, canDelete, onDelete, isCus
 
     const renderPrintArea = () => {
         if (!selectedRecord) return null;
-        
+
         return (
             <div id="asn-print-area" className="flex flex-col bg-white" style={{ width: '210mm', minHeight: '297mm', padding: '15mm', boxSizing: 'border-box' }}>
                 <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-6 w-full">
@@ -167,10 +168,10 @@ export default function BookingTable({ data, loading, canDelete, onDelete, isCus
 
     return (
         <>
-            <Table 
-                columns={columns} 
-                dataSource={data} 
-                rowKey="id" 
+            <Table
+                columns={columns}
+                dataSource={data}
+                rowKey="id"
                 loading={loading}
                 size="small"
                 pagination={{
@@ -184,10 +185,10 @@ export default function BookingTable({ data, loading, canDelete, onDelete, isCus
                 className="small-table"
                 style={{ fontSize: '11px' }}
             />
-            
-            <Modal 
-                title="Print Dokumen ASN (A4)" 
-                open={isModalOpen} 
+
+            <Modal
+                title="Print Dokumen ASN (A4)"
+                open={isModalOpen}
                 onOk={() => {
                     const printContent = document.getElementById('asn-print-area');
                     const originalContents = document.body.innerHTML;
@@ -195,9 +196,9 @@ export default function BookingTable({ data, loading, canDelete, onDelete, isCus
                         document.body.innerHTML = printContent.outerHTML;
                         window.print();
                         document.body.innerHTML = originalContents;
-                        window.location.reload(); 
+                        window.location.reload();
                     }
-                }} 
+                }}
                 onCancel={() => setIsModalOpen(false)}
                 okText="Print Dokumen"
                 width={900}

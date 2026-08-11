@@ -13,6 +13,25 @@ export default function ModalCreate({ visible, onClose, onSuccess }: Props) {
     const { message } = App.useApp();
     const manifestInputRef = useRef<any>(null);
 
+    const [docks, setDocks] = React.useState([]);
+    const [routes, setRoutes] = React.useState([]);
+
+    useEffect(() => {
+        const fetchMasterData = async () => {
+            try {
+                const [dockRes, routeRes] = await Promise.all([
+                    api.get('/dock'),
+                    api.get('/route')
+                ]);
+                setDocks(dockRes.data.filter((d: any) => d.status === 'ACTIVE'));
+                setRoutes(routeRes.data.filter((r: any) => r.status === 'ACTIVE'));
+            } catch (error) {
+                console.error('Failed to fetch dock/route master data');
+            }
+        };
+        fetchMasterData();
+    }, []);
+
     useEffect(() => {
         if (visible) {
             form.resetFields();
@@ -52,13 +71,21 @@ export default function ModalCreate({ visible, onClose, onSuccess }: Props) {
                     <Input ref={manifestInputRef} placeholder="Scan barcode or type here..." />
                 </Form.Item>
                 <Form.Item name="route" label="Route">
-                    <Input placeholder="e.g. ROUTE-A" />
+                    <Select placeholder="Pilih Route" allowClear showSearch>
+                        {routes.map((r: any) => (
+                            <Select.Option key={r.code} value={r.code}>{r.code} - {r.description || ''}</Select.Option>
+                        ))}
+                    </Select>
                 </Form.Item>
                 <Form.Item name="supplierName" label="Supplier Name">
                     <Input placeholder="Supplier name" />
                 </Form.Item>
                 <Form.Item name="dockCode" label="Dock Kode">
-                    <Input placeholder="Dock Kode" />
+                    <Select placeholder="Pilih Dock" allowClear showSearch>
+                        {docks.map((d: any) => (
+                            <Select.Option key={d.code} value={d.code}>{d.code} - {d.description || ''}</Select.Option>
+                        ))}
+                    </Select>
                 </Form.Item>
                 <Form.Item name="orderQty" label="Order Qty" initialValue={0}>
                     <InputNumber style={{ width: '100%' }} min={0} />

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, InputNumber, Select, App } from 'antd';
+import api from '@/lib/api';
 import { inboundReceiveService } from '@/services/inbound/inbound-receive.service';
 import { InboundReceive } from '@/types';
 
@@ -13,6 +14,25 @@ interface Props {
 export default function ModalUpdate({ visible, onClose, onSuccess, data }: Props) {
     const [form] = Form.useForm();
     const { message } = App.useApp();
+
+    const [docks, setDocks] = React.useState([]);
+    const [routes, setRoutes] = React.useState([]);
+
+    useEffect(() => {
+        const fetchMasterData = async () => {
+            try {
+                const [dockRes, routeRes] = await Promise.all([
+                    api.get('/dock'),
+                    api.get('/route')
+                ]);
+                setDocks(dockRes.data.filter((d: any) => d.status === 'ACTIVE'));
+                setRoutes(routeRes.data.filter((r: any) => r.status === 'ACTIVE'));
+            } catch (error) {
+                console.error('Failed to fetch dock/route master data');
+            }
+        };
+        fetchMasterData();
+    }, []);
 
     useEffect(() => {
         if (visible && data) {
@@ -56,13 +76,21 @@ export default function ModalUpdate({ visible, onClose, onSuccess, data }: Props
                     <Input />
                 </Form.Item>
                 <Form.Item name="route" label="Route">
-                    <Input />
+                    <Select placeholder="Pilih Route" allowClear showSearch>
+                        {routes.map((r: any) => (
+                            <Select.Option key={r.code} value={r.code}>{r.code} - {r.description || ''}</Select.Option>
+                        ))}
+                    </Select>
                 </Form.Item>
                 <Form.Item name="supplierName" label="Supplier Name">
-                    <Input />
+                    <Input placeholder="Supplier name" />
                 </Form.Item>
                 <Form.Item name="dockCode" label="Dock Kode">
-                    <Input />
+                    <Select placeholder="Pilih Dock" allowClear showSearch>
+                        {docks.map((d: any) => (
+                            <Select.Option key={d.code} value={d.code}>{d.code} - {d.description || ''}</Select.Option>
+                        ))}
+                    </Select>
                 </Form.Item>
                 <Form.Item name="orderQty" label="Order Qty">
                     <InputNumber style={{ width: '100%' }} min={0} />

@@ -1,8 +1,8 @@
-import React from 'react';
-import { Table, Typography, Space, Button, Popconfirm } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+"use client";
 
-const { Text } = Typography;
+import React from 'react';
+import { Table, Space, Button, Popconfirm } from 'antd';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 interface ItemTableProps {
     items: any[];
@@ -19,7 +19,8 @@ export default function ItemTable({ items, loading, canEdit, canDelete, onEdit, 
             title: 'SKU',
             dataIndex: 'code',
             key: 'code',
-            render: (text: string) => <Text strong className="text-blue-600">{text}</Text>,
+            // Gunakan span standar dan class font-semibold biar ngikutin ukuran tabel & gak warna biru
+            render: (text: string) => <span className="font-semibold">{text}</span>,
         },
         {
             title: 'Nama Barang',
@@ -86,9 +87,9 @@ export default function ItemTable({ items, loading, canEdit, canDelete, onEdit, 
     ];
 
     return (
-        <Table 
-            dataSource={items} 
-            columns={columns} 
+        <Table
+            dataSource={items}
+            columns={columns}
             rowKey="id"
             loading={loading}
             size="small"
