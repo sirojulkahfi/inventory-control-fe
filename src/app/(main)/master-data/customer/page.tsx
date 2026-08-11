@@ -92,7 +92,7 @@ export default function CustomerPage() {
     };
 
     return (
-        <div className="flex flex-col">
+        <>
             <Breadcrumb style={{ marginBottom: 16 }} items={[{ title: 'Master Data' }, { title: 'Customer' }]} />
 
             <ToolbarWrapper>
@@ -112,16 +112,14 @@ export default function CustomerPage() {
                 )}
             </ToolbarWrapper>
 
-            <Card className="shadow-sm rounded-xl overflow-hidden mt-2" styles={{ body: { padding: 0 } }}>
-                <CustomerTable 
-                    customers={customers} 
-                    loading={loading} 
-                    canEdit={canEdit} 
-                    canDelete={canDelete} 
-                    onEdit={handleEdit} 
-                    onDelete={handleDelete} 
-                />
-            </Card>
+            <CustomerTable 
+                customers={customers} 
+                loading={loading} 
+                canEdit={canEdit} 
+                canDelete={canDelete} 
+                onEdit={handleEdit} 
+                onDelete={handleDelete} 
+            />
 
             <CustomerModal 
                 open={isModalOpen}
@@ -130,6 +128,6 @@ export default function CustomerPage() {
                 form={form}
                 editingData={editingData}
             />
-        </div>
+        </>
     );
 }

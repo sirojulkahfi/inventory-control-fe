@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Typography, Space, App, Tag } from 'antd';
-import { PlusOutlined, BookOutlined } from '@ant-design/icons';
+import { Breadcrumb, App } from 'antd';
+import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import BookingTable from './_components/BookingTable';
 import BookingModal from './_components/BookingModal';
-
-const { Title, Text } = Typography;
+import ToolbarWrapper from '@/components/ui/ToolbarWrapper';
+import ButtonToolbar from '@/components/ui/ButtonToolbar';
 
 export default function BookingPage() {
     const { user } = useAuthStore();
@@ -28,7 +28,6 @@ export default function BookingPage() {
         try {
             const res = await api.get('/booking');
             let data = res.data;
-            // ROLE BASED FILTERING: If logged in user has customerId, ONLY show their bookings
             if (user?.customerId) {
                 data = data.filter((b: any) => b.customerId === user.customerId);
             }
@@ -47,7 +46,6 @@ export default function BookingPage() {
                 api.get('/customer')
             ]);
             
-            // Filter items based on customer if needed
             if (user?.customerId) {
                 setItems(itemRes.data.filter((i: any) => i.customerId === user.customerId));
                 setCustomers(custRes.data.filter((c: any) => c.id === user.customerId));
@@ -79,44 +77,28 @@ export default function BookingPage() {
         }
     };
 
-    // Checking permissions. For a customer portal, if user.customerId is present, they can create.
-    const canCreate = (user?.role?.permissions?.includes('CREATE_BOOKING') ?? false) || !!user?.customerId;
-    const canDelete = (user?.role?.permissions?.includes('DELETE_BOOKING') ?? false) || !!user?.customerId;
+    const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
+    const canCreate = isSuperAdmin || (user?.role?.permissions?.includes('CREATE_BOOKING') ?? false) || (user?.role?.permissions?.includes('CREATE ASN') ?? false) || !!user?.customerId;
+    const canDelete = isSuperAdmin || (user?.role?.permissions?.includes('DELETE_BOOKING') ?? false) || (user?.role?.permissions?.includes('DELETE ASN') ?? false) || !!user?.customerId;
 
     return (
-        <div className="flex flex-col gap-6 p-4">
-            <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm">
-                <div>
-                    <Title level={2} style={{ margin: 0, color: '#063834' }}>
-                        <BookOutlined className="mr-3" /> 
-                        Manajemen ASN (Booking)
-                    </Title>
-                    <Text type="secondary" className="text-lg">
-                        {user?.customerId ? "Buat dan pantau rencana pengiriman barang ke gudang." : "Kelola semua rencana pengiriman (ASN) dari Customer."}
-                    </Text>
-                </div>
-                {canCreate && (
-                    <Button 
-                        type="primary" 
-                        icon={<PlusOutlined />} 
-                        onClick={handleCreate}
-                        size="large"
-                        style={{ borderRadius: '8px' }}
-                    >
-                        Buat Rencana (ASN)
-                    </Button>
-                )}
-            </div>
+        <>
+            <Breadcrumb style={{ marginBottom: 16 }} items={[{ title: 'Inbound' }, { title: 'Manajemen ASN' }]} />
 
-            <Card className="shadow-sm rounded-2xl" styles={{ body: { padding: 0 } }}>
-                <BookingTable 
-                    data={bookings}
-                    loading={loading}
-                    canDelete={canDelete}
-                    onDelete={handleDelete}
-                    isCustomerPortal={!!user?.customerId}
-                />
-            </Card>
+            <ToolbarWrapper>
+                <ButtonToolbar message="Refresh Data" icon={<ReloadOutlined />} onClick={fetchBookings} />
+                {canCreate && (
+                    <ButtonToolbar message="Buat Rencana (ASN)" icon={<PlusOutlined />} onClick={handleCreate} />
+                )}
+            </ToolbarWrapper>
+
+            <BookingTable 
+                data={bookings}
+                loading={loading}
+                canDelete={canDelete}
+                onDelete={handleDelete}
+                isCustomerPortal={!!user?.customerId}
+            />
 
             <BookingModal 
                 open={isModalVisible}
@@ -129,6 +111,6 @@ export default function BookingPage() {
                 customers={customers}
                 user={user}
             />
-        </div>
+        </>
     );
 }

@@ -113,7 +113,7 @@ export default function ItemPage() {
     };
 
     return (
-        <div className="flex flex-col">
+        <>
             <Breadcrumb style={{ marginBottom: 16 }} items={[{ title: 'Master Data' }, { title: 'Item (SKU)' }]} />
 
             <ToolbarWrapper>
@@ -136,16 +136,14 @@ export default function ItemPage() {
                 )}
             </ToolbarWrapper>
 
-            <Card className="shadow-sm rounded-xl overflow-hidden mt-2" styles={{ body: { padding: 0 } }}>
-                <ItemTable 
-                    items={items} 
-                    loading={loading} 
-                    canEdit={canEdit} 
-                    canDelete={canDelete} 
-                    onEdit={handleEdit} 
-                    onDelete={handleDelete} 
-                />
-            </Card>
+            <ItemTable 
+                items={items} 
+                loading={loading} 
+                canEdit={canEdit} 
+                canDelete={canDelete} 
+                onEdit={handleEdit} 
+                onDelete={handleDelete} 
+            />
 
             <ItemModal 
                 open={isModalOpen}
@@ -156,7 +154,7 @@ export default function ItemPage() {
                 customers={customers}
                 user={user}
             />
-        </div>
+        </>
     );
 }
 

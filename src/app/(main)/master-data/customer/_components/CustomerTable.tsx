@@ -86,8 +86,17 @@ export default function CustomerTable({ customers, loading, canEdit, canDelete, 
             columns={columns} 
             rowKey="id"
             loading={loading}
-            pagination={{ pageSize: 10 }}
-            rowClassName="hover:bg-slate-50 transition-colors"
+            size="small"
+            pagination={{
+                size: 'small',
+                pageSize: 100,
+                showSizeChanger: true,
+                hideOnSinglePage: true,
+                showTotal: (total) => `Total ${total} items`,
+            }}
+            scroll={{ y: 'calc(100vh - 360px)' }}
+            className="small-table"
+            style={{ fontSize: '11px' }}
         />
     );
 }

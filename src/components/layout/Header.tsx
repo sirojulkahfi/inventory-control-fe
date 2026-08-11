@@ -1,10 +1,8 @@
 'use client';
 
-import { Layout, Dropdown, MenuProps, Avatar, Space, Badge } from 'antd';
+import { Dropdown, MenuProps, Avatar, Badge } from 'antd';
 import { UserOutlined, LogoutOutlined, BellOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/useAuthStore';
-
-const { Header: AntHeader } = Layout;
 
 interface HeaderProps {
   collapsed?: boolean;
@@ -35,43 +33,30 @@ export default function Header({ collapsed, onToggle }: HeaderProps) {
   ];
 
   return (
-    <AntHeader
-      className="circuit-bg shadow-sm"
-      style={{
-        padding: '0 24px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        position: 'sticky',
-        top: 0,
-        zIndex: 1000,
-        width: '100%'
-      }}
-    >
+    <header className="circuit-bg sticky top-0 z-50 flex items-center justify-between px-6 h-16 w-full shadow-sm">
       <div className="flex items-center gap-4">
         {onToggle && (
-          <div
+          <button
             onClick={onToggle}
-            className="cursor-pointer text-white hover:text-blue-300 transition-colors flex items-center justify-center p-1 rounded-md hover:bg-white/10"
+            className="cursor-pointer text-white hover:text-blue-300 transition-colors flex items-center justify-center p-1 rounded-md hover:bg-white/10 border-none bg-transparent"
           >
             {collapsed ? (
               <MenuUnfoldOutlined style={{ fontSize: 20 }} />
             ) : (
               <MenuFoldOutlined style={{ fontSize: 20 }} />
             )}
-          </div>
+          </button>
         )}
         <h4 className="text-xl md:text-2xl font-extrabold text-white tracking-wide m-0 drop-shadow-sm">
           RJL - Inventory System
         </h4>
       </div>
 
-      <Space size={16} className="flex items-center">
+      <div className="flex items-center gap-4">
         <Badge count={0} size="small">
           <BellOutlined style={{ fontSize: 18, color: 'white', cursor: 'pointer' }} />
         </Badge>
 
-        {/* Sekarang akan muncul: Hello, Wissa Gamma */}
         <span className="hidden md:inline-block text-white font-medium">
           Hello, {user?.name}
         </span>
@@ -81,7 +66,7 @@ export default function Header({ collapsed, onToggle }: HeaderProps) {
             <Avatar icon={<UserOutlined />} />
           </div>
         </Dropdown>
-      </Space>
-    </AntHeader>
+      </div>
+    </header>
   );
 }

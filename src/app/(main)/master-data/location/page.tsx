@@ -91,7 +91,7 @@ export default function LocationPage() {
     };
 
     return (
-        <div className="flex flex-col">
+        <>
             <Breadcrumb style={{ marginBottom: 16 }} items={[{ title: 'Master Data' }, { title: 'Location' }]} />
 
             <ToolbarWrapper>
@@ -111,16 +111,14 @@ export default function LocationPage() {
                 )}
             </ToolbarWrapper>
 
-            <Card className="shadow-sm rounded-xl overflow-hidden mt-2" styles={{ body: { padding: 0 } }}>
-                <LocationTable 
-                    locations={locations} 
-                    loading={loading} 
-                    canEdit={canEdit} 
-                    canDelete={canDelete} 
-                    onEdit={handleEdit} 
-                    onDelete={handleDelete} 
-                />
-            </Card>
+            <LocationTable 
+                locations={locations} 
+                loading={loading} 
+                canEdit={canEdit} 
+                canDelete={canDelete} 
+                onEdit={handleEdit} 
+                onDelete={handleDelete} 
+            />
 
             <LocationModal 
                 open={isModalOpen}
@@ -129,7 +127,7 @@ export default function LocationPage() {
                 form={form}
                 editingData={editingData}
             />
-        </div>
+        </>
     );
 }
 
