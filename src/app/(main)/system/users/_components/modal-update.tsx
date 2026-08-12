@@ -54,8 +54,10 @@ export default function ModalUpdate({ visible, onClose, onSuccess, data }: Props
             message.success('User updated successfully');
             onSuccess();
             onClose();
-        } catch (error) {
-            message.error('Failed to update user');
+        } catch (error: any) {
+            if (error?.errorFields) return; // Validation error on form
+            const errorMsg = error?.response?.data?.message || 'Failed to update user';
+            message.error(Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg);
         } finally {
             setLoading(false);
         }

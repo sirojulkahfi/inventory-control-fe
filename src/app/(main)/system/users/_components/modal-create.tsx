@@ -49,8 +49,10 @@ export default function ModalCreate({ visible, onClose, onSuccess }: Props) {
             message.success('User created successfully');
             onSuccess();
             onClose();
-        } catch (error) {
-            message.error('Failed to create user');
+        } catch (error: any) {
+            if (error?.errorFields) return; // Form validation error
+            const errorMsg = error?.response?.data?.message || 'Failed to create user';
+            message.error(Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg);
         } finally {
             setLoading(false);
         }
