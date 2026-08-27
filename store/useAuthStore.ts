@@ -29,7 +29,7 @@ let user: AuthUser | null = null;
 if (token) {
   try {
     user = jwtDecode<AuthUser>(token);
-  } catch (e) {
+  } catch {
     Cookies.remove('accessToken');
   }
 }
@@ -46,7 +46,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
     Cookies.remove('accessToken');
     set({ token: null, user: null });
     if (typeof window !== 'undefined') {
-      window.location.href = '/login';
+      window.location.href = window.location.origin + '/login';
     }
   },
 }));

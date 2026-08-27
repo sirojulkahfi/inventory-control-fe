@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 import { PaginatedResponse } from '@/types/common';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' }
 });
@@ -21,7 +21,7 @@ axiosInstance.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       Cookies.remove('accessToken');
-      if (typeof window !== 'undefined') window.location.href = '/login';
+      if (typeof window !== 'undefined') window.location.href = window.location.origin + '/login';
     }
     return Promise.reject(error);
   }
@@ -33,7 +33,7 @@ export default axiosInstance;
 // CRUD FACTORY - THE ULTIMATE DRY PATTERN
 // ==========================================
 export const createCrudService = <T, CreateDto = Partial<T>, UpdateDto = Partial<T>>(endpoint: string) => ({
-  findAll: async (params?: any) => {
+  findAll: async (params?: Record<string, unknown>) => {
     const { data } = await axiosInstance.get<PaginatedResponse<T>>(endpoint, { params });
     return data;
   },

@@ -75,7 +75,7 @@ export interface AuditLog {
   action: string;
   entity: string;
   entityId?: string;
-  details?: any;
+  details?: Record<string, unknown>;
   ipAddress?: string;
   createdAt: string;
 }
